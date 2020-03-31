@@ -8,7 +8,7 @@
 #ifndef INC_MECHANICAL_VENTILATION_H
 #define INC_MECHANICAL_VENTILATION_H
 
-#include <float.h> 
+#include <float.h>
 #include <inttypes.h>
 #include "pinout.h"
 #include "defaults.h"
@@ -18,34 +18,43 @@
 #include "src/FlexyStepper/FlexyStepper.h"
 
 /** States of the mechanical ventilation. */
-enum State {
+enum State
+{
     Init_Insufflation = 1,
-    State_Insufflation = 2,             /**< Insufflating (PID control). */
+    State_Insufflation = 2, /**< Insufflating (PID control). */
     Init_Exsufflation = 3,
-    State_Exsufflation = 4,              /**< Return to position 0 and wait for the patient to exsufflate. */
+    State_Exsufflation = 4, /**< Return to position 0 and wait for the patient to exsufflate. */
     State_Homing = 0,
     State_Error = -1
+};
+
+enum Alarm
+{
+    No_Alarm = 0,
+    Pressure_Over_Pip = 1,
+    Pressure_Under_Peep = 2,
+    No_Flux = 3
 };
 
 /**
  * This is the mechanical ventilation class.
  */
-class MechVentilation {
+class MechVentilation
+{
 public:
-	/**
+    /**
 	 * @brief Construct a new Mech Ventilation object
-	 * 
-	 * @param stepper 
-	 * @param sensors 
-	 * @param pid 
-	 * @param options 
+	 *
+	 * @param stepper
+	 * @param sensors
+	 * @param pid
+	 * @param options
 	 */
-	MechVentilation(
-        FlexyStepper* stepper,
-        Sensors* sensors,
-        AutoPID* pid,
-        VentilationOptions_t options
-    );
+    MechVentilation(
+        FlexyStepper *stepper,
+        Sensors *sensors,
+        AutoPID *pid,
+        VentilationOptions_t options);
 
     boolean getStartWasTriggeredByPatient();
     void setVentilationCyle_WaitTime(float speedExsufflation);
@@ -53,6 +62,8 @@ public:
     void start(void);
     /** Stop mechanical ventilation. */
     void stop(void);
+    /** Alarms */
+    // void evaluateAlarm(void);
     /** Update mechanical ventilation.
      *
      * If any control variable were to change, new value
@@ -72,6 +83,7 @@ public:
     short getInsuflationTime(void);
     float getPeakInspiratoryPressure(void);
     float getPeakEspiratoryPressure(void);
+    State getState(void);
     /**
      * setters
      */
@@ -82,29 +94,29 @@ public:
 private:
     /** Initialization. */
     void _init(
-        FlexyStepper* stepper,
-        Sensors* sensors,
-        AutoPID* pid,
-        VentilationOptions_t options
-    );
-    #if 0
+        FlexyStepper *stepper,
+        Sensors *sensors,
+        AutoPID *pid,
+        VentilationOptions_t options);
+#if 0
     int _calculateInsuflationPosition (void);
-    #endif
+#endif
 
     /** Set state. */
     void _setState(State state);
-    #if 0
+    void _setAlarm(Alarm alarm);
+#if 0
     void _increaseInsuflationSpeed (byte factor);
     void _decreaseInsuflationSpeed (byte factor);
     void _increaseInsuflation (byte factor);
     void _decreaseInsuflation (byte factor);
-    #endif
+#endif
     void _setInspiratoryCycle(void);
 
     /* Configuration parameters */
-    FlexyStepper* _stepper;
-    Sensors* _sensors;
-    AutoPID* _pid;
+    FlexyStepper *_stepper;
+    Sensors *_sensors;
+    AutoPID *_pid;
 
     /** Flow trigger activation. */
     bool _hasTrigger;
@@ -123,10 +135,10 @@ private:
 
     /* Internal state */
     /** Current state. */
-    State _currentState = 0;
+    State _currentState = State_Homing;
+    Alarm _currentAlarm = No_Alarm;
 
-
-    /** Stepper speed. @todo Denote units. */
+    /** Stepper speed. Steps per seconds. */
     float _stepperSpeed;
     bool _running = false;
     bool _sensor_error_detected;

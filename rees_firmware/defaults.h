@@ -9,6 +9,7 @@
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 50 //msec
 #define TIME_SENSOR 50
+#define TIME_SEND_CONFIGURATION 2000 // msec
 
 // Sensores
 #define ENABLED_SENSOR_VOLUME 1
@@ -39,12 +40,12 @@
 #define DEFAULT_MAX_VOLUMEN_TIDAL 800
 #define DEFAULT_MIN_VOLUMEN_TIDAL 240
 #define DEFAULT_TRIGGER_THRESHOLD 3.0
-#define DEFAULT_RPM 3
+#define DEFAULT_RPM 14
 #define DEFAULT_MAX_RPM 24
 #define DEFAULT_MIN_RPM 3
-#define DEFAULT_POR_INSPIRATORIO 50  // %
+#define DEFAULT_POR_INSPIRATORIO 33.3333F // %
 #define DEFAULT_PEAK_INSPIRATORY_PRESSURE 20
-#define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
+#define DEFAULT_PEAK_ESPIRATORY_PRESSURE 10
 // #define DEFAULT_PEAK_ESPIRATORY_PRESSURE 6
 
 // Presión
@@ -52,13 +53,13 @@
 
 // PID constants
 // PID settings and gains
-#define PID_MIN -10000 // TODO: check direction implementation
-#define PID_MAX 10000
+#define PID_MIN -20000 // TODO: check direction implementation
+#define PID_MAX 20000
 #define PID_KP 1000
 #define PID_KI 40
-#define PID_KD 0
+#define PID_KD 100
 #define PID_TS TIME_BASE
-#define PID_BANGBANG 4
+#define PID_BANGBANG 8
 
 // Solenoid
 #define SOLENOID_CLOSED 0

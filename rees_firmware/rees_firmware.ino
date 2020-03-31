@@ -40,6 +40,30 @@ MechVentilation * ventilation;
 
 VentilationOptions_t options;
 
+/**
+ * Read commands
+ */
+
+void readIncomingMsg (void) {
+    char* msg = malloc(100);
+    Serial2.readStringUntil('\n').toCharArray(msg, 100);
+    int pip, peep, fr;
+    int rc = sscanf(msg, "CONFIG PIP %d", &pip);
+    if (rc == 1) {
+        ventilation->setPeakInspiratoryPressure(pip);
+    } else {
+        int rc = sscanf(msg, "CONFIG PEEP %d", &peep);
+        if (rc == 1) {
+            ventilation->setPeakEspiratoryPressure(peep);
+        } else {
+            int rc = sscanf(msg, "CONFIG BPM %d", &fr);
+            if (rc == 1) {
+                ventilation->setRPM(fr);
+            }
+        }
+    }
+    free(msg);
+}
 
 /**
  * Setup
@@ -133,27 +157,6 @@ void setup() {
 
 }
 
-void readIncomingMsg (void) {
-    char* msg = malloc(100);
-    Serial2.readStringUntil('\n').toCharArray(msg, 100);
-    int pip, peep, fr;
-    int rc = sscanf(msg, "CONFIG PIP %d", &pip);
-    if (rc == 1) {
-        ventilation->setPeakInspiratoryPressure(pip);
-    } else {
-        int rc = sscanf(msg, "CONFIG PEEP %d", &peep);
-        if (rc == 1) {
-            ventilation->setPeakEspiratoryPressure(peep);
-        } else {
-            int rc = sscanf(msg, "CONFIG BPM %d", &fr);
-            if (rc == 1) {
-                ventilation->setRPM(fr);
-            }
-        }
-    }
-    free(msg);
-}
-
 /**
  * Loop
  */
@@ -162,6 +165,18 @@ void loop() {
     unsigned long time;
     time = millis();
     unsigned long static lastReadSensor = 0;
+    unsigned long static lastSendConfiguration = 0;
+    State static lastState;
+
+    if (time > lastSendConfiguration + TIME_SEND_CONFIGURATION)
+    {
+        Serial2.print(F("CONFIG "));
+        Serial2.print(ventilation -> getPeakInspiratoryPressure());
+        Serial2.print(F(" ");
+        Serial2.print(ventilation -> getPeakInspiratoryPressure());
+        Serial2.print(F(" ");
+        Serial2.println(ventilation -> getRPM());
+    }
 
     if (time > lastReadSensor + TIME_SENSOR)
     {
@@ -184,6 +199,18 @@ void loop() {
         }
         lastReadSensor = time;
     }
+
+    if (ventilation -> getState() != lastState) {
+        if (ventilation->getState() == Init_Exsufflation) {
+            Serial2.println("VOL " + String(volume.volume));
+        }
+        else if (ventilation->getState() == State_Exsufflation) {
+            if (lastState != Init_Exsufflation) {
+                Serial2.println("VOL " + String(volume.volume));
+            }
+        }
+    }
+    lastState = ventilation -> getState();
 
     if (Serial2.available()) {
         readIncomingMsg();

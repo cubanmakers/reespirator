@@ -13,119 +13,158 @@ int currentStopInsufflationTime = 0;
 float currentFlow = 0;
 
 MechVentilation::MechVentilation(
-    FlexyStepper * stepper,
-    Sensors * sensors,
-    AutoPID * pid,
-    VentilationOptions_t options) {
+    FlexyStepper *stepper,
+    Sensors *sensors,
+    AutoPID *pid,
+    VentilationOptions_t options)
+{
 
     _init(
         stepper,
         sensors,
         pid,
-        options
-    );
-
+        options);
 }
 
 //TODO: use this method to play a beep in main loop, 1 second long for example.
-boolean MechVentilation::getStartWasTriggeredByPatient() { //returns true if last respiration cycle was started by patient trigger. It is cleared when read.
-    if (_startWasTriggeredByPatient) {
+boolean MechVentilation::getStartWasTriggeredByPatient()
+{ //returns true if last respiration cycle was started by patient trigger. It is cleared when read.
+    if (_startWasTriggeredByPatient)
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
 
 //TODO: use this method to play a beep in main loop, 2 second long for example.
-boolean MechVentilation::getSensorErrorDetected() { //returns true if there was an sensor error detected. It is cleared when read.
-    if (_sensor_error_detected) {
+boolean MechVentilation::getSensorErrorDetected()
+{ //returns true if there was an sensor error detected. It is cleared when read.
+    if (_sensor_error_detected)
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
 
-void MechVentilation::start(void) {
+void MechVentilation::start(void)
+{
     _running = true;
 }
 
-void MechVentilation::stop(void) {
+void MechVentilation::stop(void)
+{
     _running = false;
 }
 
-uint8_t MechVentilation::getRPM(void) {
+uint8_t MechVentilation::getRPM(void)
+{
     return _rpm;
 }
-short MechVentilation::getExsuflationTime(void) {
+short MechVentilation::getExsuflationTime(void)
+{
     return _timeoutEsp;
 }
-short MechVentilation::getInsuflationTime(void) {
+short MechVentilation::getInsuflationTime(void)
+{
     return _timeoutIns;
 }
 
-float MechVentilation::getPeakInspiratoryPressure(void) {
+float MechVentilation::getPeakInspiratoryPressure(void)
+{
     return _pip;
 }
 
-float MechVentilation::getPeakEspiratoryPressure(void) {
+float MechVentilation::getPeakEspiratoryPressure(void)
+{
     return _peep;
 }
 
-void MechVentilation::setRPM(uint8_t rpm) {
+State MechVentilation::getState(void)
+{
+    return _currentState;
+}
+
+void MechVentilation::setRPM(uint8_t rpm)
+{
     _rpm = rpm;
     _setInspiratoryCycle();
 }
 
-void MechVentilation::setPeakInspiratoryPressure(float pip) {
+void MechVentilation::setPeakInspiratoryPressure(float pip)
+{
     _pip = pip;
 }
 
-void MechVentilation::setPeakEspiratoryPressure(float peep) {
+void MechVentilation::setPeakEspiratoryPressure(float peep)
+{
     _peep = peep;
 }
 
-void MechVentilation::_setInspiratoryCycle(void) {
-  float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
-  _timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO/100;
-  _timeoutEsp = (timeoutCycle) - _timeoutIns;
+void MechVentilation::_setInspiratoryCycle(void)
+{
+    float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
+    _timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
+    _timeoutEsp = (timeoutCycle)-_timeoutIns;
 }
+
+// void evaluateAlarm(void)
+// {
+//     // TODO: Compare pressure with max min
+//     // _currentPressure
+
+//     // TODO: Compare flow with 0 flow
+//     // _currentFlow
+// }
 
 /**
  * It's called from timer1Isr
  */
-void MechVentilation::update(void) {
+void MechVentilation::update(void)
+{
 
     static int totalCyclesInThisState = 0;
     static int currentTime = 0;
     static int flowSetpoint = 0;
 
-    #if DEBUG_STATE_MACHINE
-        extern volatile String debugMsg[];
-        extern volatile byte debugMsgCounter;
-    #endif
-    
+#if DEBUG_STATE_MACHINE
+    extern volatile String debugMsg[];
+    extern volatile byte debugMsgCounter;
+#endif
 
-    SensorPressureValues_t pressures = _sensors -> getRelativePressureInCmH20();
+
+    SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
+    _currentPressure = pressures.pressure1;
     _currentVolume = _sensors->getVolume().volume;
     _currentFlow = _sensors->getFlow();
-    if (pressures.state != SensorStateOK) { // Sensor error detected: return to zero position and continue from there
+    if (pressures.state != SensorStateOK)
+    {                                  // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
         /* Status update, for this time */
         // TODO: SAVE PREVIOUS CYCLE IN MEMORY AND RERUN IT
         Serial.println("fail sensor");
         _setState(State_Exsufflation);
-    } else {
+    }
+    else
+    {
         _sensor_error_detected = false; //clear flag
     }
 
+    // evaluateAlarm();
 
     refreshWatchDogTimer();
 
-    switch (_currentState) {
-        case Init_Insufflation:
-            {
+    switch (_currentState)
+    {
+    case Init_Insufflation:
+    {
 #if DEBUG_UPDATE
-Serial.println("Starting insuflation");
+        Serial.println("Starting insuflation");
 #endif
         // Close Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
@@ -170,7 +209,6 @@ Serial.println("Starting insuflation");
         }
         else
         {
-            _currentPressure = pressures.pressure1;
             _pid->run(&_currentPressure, &_pip, &_stepperSpeed);
 
             // TODO: if _currentPressure > _pip + 5, trigger alarm
@@ -249,7 +287,6 @@ Serial.println("Starting insuflation");
         }
         else
         {
-            _currentPressure = pressures.pressure1;
             _pid->run(&_currentPressure, &_peep, &_stepperSpeed);
 
             _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
@@ -316,15 +353,14 @@ Serial.println("Starting insuflation");
         //TODO
         break;
     }
-
 }
 
 void MechVentilation::_init(
-    FlexyStepper * stepper,
-    Sensors * sensors,
-    AutoPID * pid,
-    VentilationOptions_t options
-) {
+    FlexyStepper *stepper,
+    Sensors *sensors,
+    AutoPID *pid,
+    VentilationOptions_t options)
+{
     /* Set configuration parameters */
     _stepper = stepper;
     _sensors = sensors;
@@ -334,9 +370,12 @@ void MechVentilation::_init(
     _peep = options.peakEspiratoryPressure;
     setRPM(_rpm);
     _hasTrigger = options.hasTrigger;
-    if (_hasTrigger) {
+    if (_hasTrigger)
+    {
         _triggerThreshold = options.triggerThreshold;
-    } else {
+    }
+    else
+    {
         _triggerThreshold = FLT_MAX;
     }
 
@@ -354,6 +393,12 @@ void MechVentilation::_init(
     _sensor_error_detected = false;
 }
 
-void MechVentilation::_setState(State state) {
+void MechVentilation::_setState(State state)
+{
     _currentState = state;
+}
+
+void MechVentilation::_setAlarm(Alarm alarm)
+{
+    _currentAlarm = alarm;
 }
