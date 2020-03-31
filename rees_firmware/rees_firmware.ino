@@ -64,10 +64,17 @@ void readIncomingMsg (void) {
                 }
             }
         }
-    } else if (String(msg).substring(0, 7) == "RECRUIT") {
-        if (msg == "RECRUIT ON") {
+    }
+    else if (String(msg).substring(0, 7) == "RECRUIT")
+    {
+        if (String(msg).substring(8, 10) == " ON")
+        {
+            // Serial.println("ACK: " + String(msg));
             ventilation->activateRecruitment();
-        } else if (msg == "RECRUIT OFF") {
+        }
+        else if (String(msg).substring(8, 11) == " OFF")
+        {
+            // Serial.println("ACK: " + String(msg));
             ventilation->deactivateRecruitment();
         }
     }
@@ -186,6 +193,7 @@ void loop() {
         Serial2.print(ventilation -> getPeakEspiratoryPressure());
         Serial2.print(F(" "));
         Serial2.println(ventilation -> getRPM());
+        lastSendConfiguration = time;
     }
 
     if (time > lastReadSensor + TIME_SENSOR)
@@ -199,7 +207,7 @@ void loop() {
         char* string = (char*)malloc(100);
         sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
         Serial2.println(string);
-        //Serial.println(string);
+        Serial.println(string);
         free(string);
 
         if (pressure.state == SensorStateFailed) {

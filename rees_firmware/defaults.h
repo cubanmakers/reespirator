@@ -8,7 +8,7 @@
 
 // Base de tiempos. Periodo de llamada a mechVentilation.update
 #define TIME_BASE 20                 // msec
-#define TIME_SENSOR 20               // msec
+#define TIME_SENSOR 50               // msec
 #define TIME_SEND_CONFIGURATION 2000 // msec
 
 // Sensores
@@ -59,13 +59,16 @@
 #define ALARM_MAX_PRESSURE 35 // cm H2O
 #define ALARM_MIN_PRESSURE 1  // cm H2O
 
+// Válvula de emergencia
+#define VALVE_MAX_PRESSURE 60 // cm H2O
+
 // PID constants
 // PID settings and gains
 #define PID_MIN -20000 // TODO: check direction implementation
 #define PID_MAX 20000
-#define PID_KP 1000
-#define PID_KI 40
-#define PID_KD 100
+#define PID_KP 80
+#define PID_KI 0
+#define PID_KD 0
 #define PID_TS TIME_BASE
 #define PID_BANGBANG 8
 

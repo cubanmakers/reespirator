@@ -113,18 +113,18 @@ void MechVentilation::_setInspiratoryCycle(void)
     _timeoutEsp = (timeoutCycle) - _timeoutIns;
 }
 
-void MechVentilation::evaluateAlarm(void)
+void MechVentilation::evaluatePressure(void)
 {
     if (_currentPressure > ALARM_MAX_PRESSURE)
     {
         digitalWrite(PIN_BUZZ, HIGH);
         _currentAlarm = Alarm_Overpressure;
     }
-    else if (_currentPressure < ALARM_MIN_PRESSURE)
-    {
-        digitalWrite(PIN_BUZZ, HIGH);
-        _currentAlarm = Alarm_Underpressure;
-    }
+    // else if (_currentPressure < ALARM_MIN_PRESSURE)
+    // {
+        // digitalWrite(PIN_BUZZ, HIGH);
+        // _currentAlarm = Alarm_Underpressure;
+    // }
     else
     {
         if (_currentAlarm != No_Alarm) {
@@ -132,8 +132,12 @@ void MechVentilation::evaluateAlarm(void)
             _currentAlarm = No_Alarm;
         }
     }
-    // TODO: Compare flow with 0 flow
-    // _currentFlow
+
+    // Valve
+    if (_currentPressure > VALVE_MAX_PRESSURE)
+    {
+        digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
+    }
 }
 
 void MechVentilation::activateRecruitment(void)
@@ -187,8 +191,8 @@ void MechVentilation::update(void)
         _sensor_error_detected = false; //clear flag
     }
 
-    // Check sensor values
-    evaluateAlarm();
+    // Check pressures
+    evaluatePressure();
 
     refreshWatchDogTimer();
 
@@ -284,6 +288,8 @@ void MechVentilation::update(void)
 #if DEBUG_STATE_MACHINE
         debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
 #endif
+
+    _pid->reset();
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);

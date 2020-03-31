@@ -16,7 +16,7 @@
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
-#if 0        
+#if 0
 
     if(!_pres1Sensor.begin()) {
         return 1;
@@ -24,7 +24,7 @@ unsigned int Sensors::begin(void) {
     if(!_pres2Sensor.begin()) {
         return 2;
     }
-    
+
 
     /* Default settings from datasheet. */  //TODO: valorar SAMPLING_NONE, lecturas mas rapidas?
     // Ver ejemplos: https://github.com/adafruit/Adafruit_BME280_Library/blob/master/examples/advancedsettings/advancedsettings.ino
@@ -155,7 +155,7 @@ SensorPressureValues_t Sensors::getAbsolutePressureInCmH20() {
  * @return SensorValues_t - pressure values
  */
 SensorPressureValues_t Sensors::getRelativePressureInCmH20() {
-    SensorPressureValues_t values; 
+    SensorPressureValues_t values;
     values.pressure1 = _pressure1;
     values.state = SensorStateOK;
     return values;
@@ -201,12 +201,12 @@ void Sensors::readVolume(void) {
         }
         float flow = ((float)tmp.value - SFM3300_OFFSET) / SFM3300_SCALE; //lpm
         _flow = flow;
-        
+
         unsigned short mseconds = (unsigned short)(millis() - _lastReadFlow);
         float ml = flow * mseconds / 60; // l/min * ms * 1000 (ml) /60000 (ms)
         _volume_ml += ml;
         _lastReadFlow = millis();
-        
+
     #else
     #error "not implemented"
     #endif
@@ -222,7 +222,7 @@ SensorVolumeValue_t Sensors::getVolume() {
     SensorVolumeValue_t values;
 
 #if ENABLED_SENSOR_VOLUME_SFM3300
-    
+
     if (_state == SensorStateOK) {
         values.state = SensorStateOK;
     } else {
