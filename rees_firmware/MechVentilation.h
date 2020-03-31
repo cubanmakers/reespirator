@@ -138,9 +138,9 @@ private:
     /** Breaths per minute */
     uint8_t _rpm;
     /** Peak inspiratory pressure */
-    float volatile _pip;
+    short volatile _pip;
     /** Peak espiratory pressure */
-    float _peep;
+    short _peep;
     /** Recruitment */
     bool volatile _recruitmentMode = false;
 

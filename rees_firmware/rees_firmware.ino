@@ -49,7 +49,7 @@ void readIncomingMsg (void) {
     char* msg = (char*)malloc(100);
     Serial2.readStringUntil('\n').toCharArray(msg, 100);
     int pip, peep, fr;
-    if (msg.substring(0, 6) == "CONFIG") {
+    if (String(msg).substring(0, 6) == "CONFIG") {
         int rc = sscanf(msg, "CONFIG PIP %d", &pip);
         if (rc == 1) {
             ventilation->setPeakInspiratoryPressure(pip);
@@ -64,7 +64,7 @@ void readIncomingMsg (void) {
                 }
             }
         }
-    } else if (msg.substring(0, 7) == "RECRUIT") {
+    } else if (String(msg).substring(0, 7) == "RECRUIT") {
         if (msg == "RECRUIT ON") {
             ventilation->activateRecruitment();
         } else if (msg == "RECRUIT OFF") {
@@ -157,7 +157,8 @@ void setup() {
     sensors -> readPressure();
     // TODO: Make this period dependant of TIME_BASE
     // TIME_BASE * 1000 does not work!!
-    Timer1.initialize(50000); // 50 ms
+    // Timer1.initialize(50000); // 50 ms
+    Timer1.initialize(20000);
 
     Timer1.attachInterrupt(timer1Isr);
     //TODO: Option: if (Sensores ok) { arranca timer3 }
@@ -182,7 +183,7 @@ void loop() {
         Serial2.print(F("CONFIG "));
         Serial2.print(ventilation -> getPeakInspiratoryPressure());
         Serial2.print(F(" "));
-        Serial2.print(ventilation -> getPeakInspiratoryPressure());
+        Serial2.print(ventilation -> getPeakEspiratoryPressure());
         Serial2.print(F(" "));
         Serial2.println(ventilation -> getRPM());
     }

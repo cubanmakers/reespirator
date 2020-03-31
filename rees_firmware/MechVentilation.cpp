@@ -324,7 +324,7 @@ void MechVentilation::update(void)
         }
         else
         {
-            _pid->run(_currentPressure, _peep, &_stepperSpeed);
+            _pid->run(_currentPressure, (float)_peep, &_stepperSpeed);
 
             _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
             if (_stepperSpeed >= 0)
@@ -364,17 +364,18 @@ void MechVentilation::update(void)
         {
 
             /* Stepper control: homming */
-            // bool moveToHomeInMillimeters(long directionTowardHome, float
-            // speedInMillimetersPerSecond, long maxDistanceToMoveInMillimeters, int
-            // homeLimitSwitchPin)
-            Serial.println("Homing attempt!!");
+#if DEBUG_UPDATE
+            Serial.println("Attempting homing...");
+#endif
             if (_stepper->moveToHomeInSteps(
                     STEPPER_HOMING_DIRECTION,
                     STEPPER_HOMING_SPEED,
                     STEPPER_STEPS_PER_REVOLUTION * STEPPER_MICROSTEPS,
                     PIN_ENDSTOP) != true)
             {
-                Serial.println("Homing has failed");
+#if DEBUG_UPDATE
+                    Serial.println("Homing failed");
+#endif
             }
         }
 
