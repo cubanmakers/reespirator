@@ -67,15 +67,20 @@ void readIncomingMsg (void) {
     }
     else if (String(msg).substring(0, 7) == "RECRUIT")
     {
-        if (String(msg).substring(8, 10) == " ON")
+        uint8_t tmp = 255;
+        int rc = sscanf(msg, "RECRUIT %d", &tmp);
+        switch (tmp)
         {
-            // Serial.println("ACK: " + String(msg));
-            ventilation->activateRecruitment();
-        }
-        else if (String(msg).substring(8, 11) == " OFF")
-        {
-            // Serial.println("ACK: " + String(msg));
+        case 0:
+            Serial.println("ACK 0");
             ventilation->deactivateRecruitment();
+            break;
+        case 1:
+            Serial.println("ACK 1");
+            ventilation->activateRecruitment();
+            break;
+        default:
+            break;
         }
     }
     free(msg);
@@ -207,7 +212,7 @@ void loop() {
         char* string = (char*)malloc(100);
         sprintf(string, "DT %05d %05d %05d %06d", ((int)pressure.pressure1), ((int)pressure.pressure2), volume.volume, ((int)(sensors->getFlow() * 1000)));
         Serial2.println(string);
-        Serial.println(string);
+        // Serial.println(string);
         free(string);
 
         if (pressure.state == SensorStateFailed) {
