@@ -7,12 +7,7 @@
 #include "src/Honeywell_ABP/Honeywell_ABP.h"
 #include "pinout.h"
 
-    static Honeywell_ABP abp(
-  0x28,   // I2C address
-  0,      // minimum pressure
-  70.307,      // maximum pressure
-  "mbar"   // pressure unit
-);
+    static Honeywell_ABP* abp;
 
 unsigned int Sensors::begin(void) {
     // Arrancar sensores de presion 1 y 2
@@ -50,6 +45,12 @@ Sensors::Sensors(void) {
 
 
 void Sensors::_init () {
+    abp = new Honeywell_ABP(
+  0x28,   // I2C address
+  0,      // minimum pressure
+  70.307,      // maximum pressure
+  "mbar"   // pressure unit
+);
 #if 0
     Adafruit_BME280 bmp1(
     PIN_BME_CS1,
@@ -87,8 +88,8 @@ void Sensors::_init () {
 void Sensors::readPressure() {
     float pres1, pres2;
     // Acquire sensors data
-    abp.update();
-    pres1 = abp.pressure();
+    abp->update();
+    pres1 = abp->pressure();
     _pressure1 = pres1;
     #if 0
     pres1 = _pres1Sensor.readPressure(); // Pa

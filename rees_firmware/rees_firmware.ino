@@ -159,7 +159,7 @@ void setup() {
     ventilation -> start();
     ventilation -> update();
 
-    delay(2000);
+    delay(1000);
 
     sensors -> readPressure();
     // TODO: Make this period dependant of TIME_BASE
