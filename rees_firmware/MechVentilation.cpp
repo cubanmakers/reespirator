@@ -277,6 +277,7 @@ void MechVentilation::update(void)
         digitalWrite(PIN_SOLENOID, SOLENOID_OPEN);
 
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
+        _sensors->saveVolume();
 
 #if DEBUG_STATE_MACHINE
         debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);

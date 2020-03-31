@@ -191,6 +191,10 @@ float Sensors::getFlow(void) {
     return _flow;
 }
 
+void Sensors::saveVolume(void) {
+    _lastVolume = _volume_ml;
+}
+
 void Sensors::readVolume(void) {
     #if ENABLED_SENSOR_VOLUME_SFM3300
         SFM3000_Value_t tmp = _sfm3000->getvalue(); //TODO crc

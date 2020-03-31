@@ -42,6 +42,7 @@ class Sensors
     SensorPressureValues_t getAbsolutePressureInCmH20();
     SensorPressureValues_t getRelativePressureInCmH20();
     SensorVolumeValue_t getVolume();
+    void saveVolume(void);
     void getOffsetBetweenPressureSensors(int samples = 100);
 #if ENABLED_SENSOR_VOLUME
     void readVolume(void);
@@ -63,6 +64,7 @@ class Sensors
 #if ENABLED_SENSOR_VOLUME
     float _volume_ml;
     float _flow;
+    volatile float _lastVolume;
     unsigned long _lastReadFlow;
 #endif
 
