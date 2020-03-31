@@ -90,8 +90,8 @@ public:
     uint8_t getRPM(void);
     short getExsuflationTime(void);
     short getInsuflationTime(void);
-    float getPeakInspiratoryPressure(void);
-    float getPeakEspiratoryPressure(void);
+    short getPeakInspiratoryPressure(void);
+    short getPeakEspiratoryPressure(void);
     State getState(void);
     /**
      * setters

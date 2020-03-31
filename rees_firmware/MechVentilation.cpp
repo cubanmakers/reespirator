@@ -75,12 +75,12 @@ short MechVentilation::getInsuflationTime(void)
     return _timeoutIns;
 }
 
-float MechVentilation::getPeakInspiratoryPressure(void)
+short MechVentilation::getPeakInspiratoryPressure(void)
 {
     return _pip;
 }
 
-float MechVentilation::getPeakEspiratoryPressure(void)
+short MechVentilation::getPeakEspiratoryPressure(void)
 {
     return _peep;
 }
@@ -206,6 +206,9 @@ void MechVentilation::update(void)
         // Close Solenoid Valve
         digitalWrite(PIN_SOLENOID, SOLENOID_CLOSED);
 
+        // Reset volume
+        _sensors->resetVolumeIntegrator();
+
         totalCyclesInThisState = (_timeoutIns) / TIME_BASE;
 
         /* Stepper control: set acceleration and end-position */
@@ -284,6 +287,8 @@ void MechVentilation::update(void)
 #if DEBUG_STATE_MACHINE
         debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);
 #endif
+
+
         /* Stepper control*/
         _stepper->setSpeedInStepsPerSecond(_stepperSpeed);
         _stepper->setAccelerationInStepsPerSecondPerSecond(
