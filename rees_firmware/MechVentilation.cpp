@@ -214,6 +214,8 @@ void MechVentilation::update(void)
             STEPPER_ACC_INSUFFLATION);
         _stepper->setTargetPositionInSteps(STEPPER_HIGHEST_POSITION);
 
+        _pid->reset();
+
 #if DEBUG_STATE_MACHINE
         debugMsg[debugMsgCounter++] = "State: InitInsuflation at " + String(millis());
 #endif
@@ -289,7 +291,7 @@ void MechVentilation::update(void)
         debugMsg[debugMsgCounter++] = "Motor: to exsuflation at " + String(millis());
 #endif
 
-    _pid->reset();
+        _pid->reset();
 
         /* Status update and reset timer, for next time */
         _setState(State_Exsufflation);
