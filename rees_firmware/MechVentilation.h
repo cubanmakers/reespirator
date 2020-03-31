@@ -63,7 +63,7 @@ public:
     /** Stop mechanical ventilation. */
     void stop(void);
     /** Alarms */
-    // void evaluateAlarm(void);
+    void evaluateAlarm(void);
     /** Update mechanical ventilation.
      *
      * If any control variable were to change, new value

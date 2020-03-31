@@ -113,14 +113,14 @@ void MechVentilation::_setInspiratoryCycle(void)
     _timeoutEsp = (timeoutCycle)-_timeoutIns;
 }
 
-// void evaluateAlarm(void)
-// {
-//     // TODO: Compare pressure with max min
-//     // _currentPressure
+void MechVentilation::evaluateAlarm(void)
+{
+    // TODO: Compare pressure with max min
+    // _currentPressure
 
-//     // TODO: Compare flow with 0 flow
-//     // _currentFlow
-// }
+    // TODO: Compare flow with 0 flow
+    // _currentFlow
+}
 
 /**
  * It's called from timer1Isr
@@ -155,7 +155,7 @@ void MechVentilation::update(void)
         _sensor_error_detected = false; //clear flag
     }
 
-    // evaluateAlarm();
+    evaluateAlarm();
 
     refreshWatchDogTimer();
 

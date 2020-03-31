@@ -45,7 +45,7 @@ VentilationOptions_t options;
  */
 
 void readIncomingMsg (void) {
-    char* msg = malloc(100);
+    char* msg = (char*)malloc(100);
     Serial2.readStringUntil('\n').toCharArray(msg, 100);
     int pip, peep, fr;
     int rc = sscanf(msg, "CONFIG PIP %d", &pip);
@@ -172,9 +172,9 @@ void loop() {
     {
         Serial2.print(F("CONFIG "));
         Serial2.print(ventilation -> getPeakInspiratoryPressure());
-        Serial2.print(F(" ");
+        Serial2.print(F(" "));
         Serial2.print(ventilation -> getPeakInspiratoryPressure());
-        Serial2.print(F(" ");
+        Serial2.print(F(" "));
         Serial2.println(ventilation -> getRPM());
     }
 
@@ -198,19 +198,26 @@ void loop() {
             // TODO: BUZZ ALARMS LIKE HELL
         }
         lastReadSensor = time;
-    }
 
-    if (ventilation -> getState() != lastState) {
-        if (ventilation->getState() == Init_Exsufflation) {
-            Serial2.println("VOL " + String(volume.volume));
-        }
-        else if (ventilation->getState() == State_Exsufflation) {
-            if (lastState != Init_Exsufflation) {
+        /*
+         * Notify insufflated volume
+         */
+        if (ventilation->getState() != lastState)
+        {
+            if (ventilation->getState() == Init_Exsufflation)
+            {
                 Serial2.println("VOL " + String(volume.volume));
             }
+            else if (ventilation->getState() == State_Exsufflation)
+            {
+                if (lastState != Init_Exsufflation)
+                {
+                    Serial2.println("VOL " + String(volume.volume));
+                }
+            }
         }
+        lastState = ventilation->getState();
     }
-    lastState = ventilation -> getState();
 
     if (Serial2.available()) {
         readIncomingMsg();
