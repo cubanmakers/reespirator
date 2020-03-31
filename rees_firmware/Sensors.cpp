@@ -91,6 +91,12 @@ void Sensors::readPressure() {
     abp->update();
     pres1 = abp->pressure();
     _pressure1 = pres1;
+    if (_minPressure > _pressure1) {
+        _minPressure = _pressure1;
+    }
+    if (_maxPressure < _pressure1) {
+        _maxPressure = _pressure1;
+    }
     #if 0
     pres1 = _pres1Sensor.readPressure(); // Pa
     pres2 = _pres2Sensor.readPressure(); // Pa
@@ -150,6 +156,14 @@ SensorPressureValues_t Sensors::getAbsolutePressureInCmH20() {
     return values;
 }
 
+SensorLastPressure_t Sensors::getLastPressure(void) {
+    SensorLastPressure_t lastPres;
+    lastPres.minPressure = _lastMinPressure;
+    lastPres.maxPressure = _lastMaxPressure;
+    return lastPres;
+}
+
+
 /**
  * @brief Get relative pressure in H20 cm.
  *
@@ -194,6 +208,8 @@ float Sensors::getFlow(void) {
 
 void Sensors::saveVolume(void) {
     _lastVolume = _volume_ml;
+    _lastMinPressure = _minPressure;
+    _lastMaxPressure = _maxPressure;
 }
 
 void Sensors::readVolume(void) {
@@ -219,6 +235,8 @@ void Sensors::readVolume(void) {
 
 void Sensors::resetVolumeIntegrator(void) {
     _volume_ml = 0;
+    _minPressure = 255;
+    _maxPressure = 0;
     _lastReadFlow = millis();
 }
 #endif

@@ -21,6 +21,11 @@ enum SensorState {
 };
 
 typedef struct {
+    uint8_t minPressure;
+    uint8_t maxPressure;
+} SensorLastPressure_t;
+
+typedef struct {
     SensorState state;
     float pressure1;
     float pressure2;
@@ -37,6 +42,7 @@ class Sensors
     Sensors();
     unsigned int begin(void);
     void readPressure();
+    SensorLastPressure_t getLastPressure(void);
     SensorPressureValues_t getRelativePressureInPascals();
     SensorPressureValues_t getAbsolutePressureInPascals();
     SensorPressureValues_t getAbsolutePressureInCmH20();
@@ -56,11 +62,15 @@ class Sensors
 #if ENABLED_SENSOR_VOLUME_SFM3300
     SFM3000wedo* _sfm3000;
 #endif
+    uint8_t _minPressure;
+    uint8_t _maxPressure;
     float _pressure1;
     float _pressure2;
     float _pressureSensorsOffset = 0.0;
     SensorState _state;
     byte _errorCounter;
+    volatile uint8_t _lastMinPressure;
+    volatile uint8_t _lastMaxPressure;
 #if ENABLED_SENSOR_VOLUME
     float _volume_ml;
     float _flow;

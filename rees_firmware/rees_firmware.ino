@@ -222,16 +222,19 @@ void loop() {
          */
         if (ventilation->getState() != lastState)
         {
+            SensorLastPressure_t lastPressure = sensors->getLastPressure();
             if (ventilation->getState() == Init_Exsufflation)
             {
-                Serial2.println("VOL " + String(volume.volume));
+                Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
+                    String(lastPressure.minPressure) + " " + String(volume.volume));
                 sensors->resetVolumeIntegrator();
             }
             else if (ventilation->getState() == State_Exsufflation)
             {
                 if (lastState != Init_Exsufflation)
                 {
-                    Serial2.println("VOL " + String(volume.volume));
+                    Serial2.println("EOC " + String(lastPressure.maxPressure) + " " +
+                    String(lastPressure.minPressure) + " " + String(volume.volume));
                     sensors->resetVolumeIntegrator();
                 }
             }
