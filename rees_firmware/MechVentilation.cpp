@@ -177,7 +177,7 @@ void MechVentilation::update(void)
     _currentPressure = pressures.pressure1;
     // @dc unused
     // _currentVolume = _sensors->getVolume().volume;
-    _currentFlow = _sensors->getFlow();
+    //_currentFlow = _sensors->getFlow();
     if (pressures.state != SensorStateOK)
     {                                  // Sensor error detected: return to zero position and continue from there
         _sensor_error_detected = true; //An error was detected in sensors
@@ -278,6 +278,8 @@ void MechVentilation::update(void)
 
         totalCyclesInThisState = _timeoutEsp / TIME_BASE;
         _sensors->saveVolume();
+        _sensors->resetVolumeIntegrator();
+
 
 #if DEBUG_STATE_MACHINE
         debugMsg[debugMsgCounter++] = "ExsuflationTime=" + String(totalCyclesInThisState);

@@ -251,7 +251,7 @@ SensorVolumeValue_t Sensors::getVolume() {
     } else {
         values.state = SensorStateFailed;
     }
-    values.volume = _volume_ml;
+    values.volume = _lastVolume;
 #endif
     return values;
 }
