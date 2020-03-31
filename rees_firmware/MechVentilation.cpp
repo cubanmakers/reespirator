@@ -110,16 +110,47 @@ void MechVentilation::_setInspiratoryCycle(void)
 {
     float timeoutCycle = ((float)60) * 1000 / ((float)_rpm); // Tiempo de ciclo en msegundos
     _timeoutIns = timeoutCycle * DEFAULT_POR_INSPIRATORIO / 100;
-    _timeoutEsp = (timeoutCycle)-_timeoutIns;
+    _timeoutEsp = (timeoutCycle) - _timeoutIns;
 }
 
 void MechVentilation::evaluateAlarm(void)
 {
-    // TODO: Compare pressure with max min
-    // _currentPressure
-
+    if (_currentPressure > ALARM_MAX_PRESSURE)
+    {
+        digitalWrite(PIN_BUZZ, HIGH);
+        _currentAlarm = Alarm_Overpressure;
+    }
+    else if (_currentPressure < ALARM_MIN_PRESSURE)
+    {
+        digitalWrite(PIN_BUZZ, HIGH);
+        _currentAlarm = Alarm_Underpressure;
+    }
+    else
+    {
+        if (_currentAlarm != No_Alarm) {
+            digitalWrite(PIN_BUZZ, LOW);
+            _currentAlarm = No_Alarm;
+        }
+    }
     // TODO: Compare flow with 0 flow
     // _currentFlow
+}
+
+void MechVentilation::activateRecruitment(void)
+{
+    _nominalConfiguration.pip = _pip;
+    _nominalConfiguration.timeoutIns = _timeoutIns;
+    _pip = DEFAULT_RECRUITMENT_PIP;
+    _timeoutIns = DEFAULT_RECRUITMENT_TIMEOUT;
+    _recruitmentMode = true;
+}
+
+void MechVentilation::deactivateRecruitment(void)
+{
+    _pip = _nominalConfiguration.pip;
+    _timeoutIns = _nominalConfiguration.timeoutIns;
+    _recruitmentMode = false;
+    _setState(Init_Exsufflation);
 }
 
 /**
@@ -140,7 +171,8 @@ void MechVentilation::update(void)
 
     SensorPressureValues_t pressures = _sensors->getRelativePressureInCmH20();
     _currentPressure = pressures.pressure1;
-    _currentVolume = _sensors->getVolume().volume;
+    // @dc unused
+    // _currentVolume = _sensors->getVolume().volume;
     _currentFlow = _sensors->getFlow();
     if (pressures.state != SensorStateOK)
     {                                  // Sensor error detected: return to zero position and continue from there
@@ -155,6 +187,7 @@ void MechVentilation::update(void)
         _sensor_error_detected = false; //clear flag
     }
 
+    // Check sensor values
     evaluateAlarm();
 
     refreshWatchDogTimer();
@@ -206,10 +239,14 @@ void MechVentilation::update(void)
             }
             _setState(Init_Exsufflation);
             currentTime = 0;
+
+            if (_recruitmentMode) {
+                deactivateRecruitment();
+            }
         }
         else
         {
-            _pid->run(&_currentPressure, &_pip, &_stepperSpeed);
+            _pid->run(_currentPressure, (float)_pip, &_stepperSpeed);
 
             // TODO: if _currentPressure > _pip + 5, trigger alarm
             _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
@@ -287,7 +324,7 @@ void MechVentilation::update(void)
         }
         else
         {
-            _pid->run(&_currentPressure, &_peep, &_stepperSpeed);
+            _pid->run(_currentPressure, _peep, &_stepperSpeed);
 
             _stepper->setSpeedInStepsPerSecond(abs(_stepperSpeed));
             if (_stepperSpeed >= 0)

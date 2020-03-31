@@ -214,7 +214,6 @@ void Sensors::readVolume(void) {
 
 void Sensors::resetVolumeIntegrator(void) {
     _volume_ml = 0;
-    _flow = 0;
     _lastReadFlow = millis();
 }
 #endif

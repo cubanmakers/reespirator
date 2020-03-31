@@ -44,22 +44,31 @@ VentilationOptions_t options;
  * Read commands
  */
 
+
 void readIncomingMsg (void) {
     char* msg = (char*)malloc(100);
     Serial2.readStringUntil('\n').toCharArray(msg, 100);
     int pip, peep, fr;
-    int rc = sscanf(msg, "CONFIG PIP %d", &pip);
-    if (rc == 1) {
-        ventilation->setPeakInspiratoryPressure(pip);
-    } else {
-        int rc = sscanf(msg, "CONFIG PEEP %d", &peep);
+    if (msg.substring(0, 6) == "CONFIG") {
+        int rc = sscanf(msg, "CONFIG PIP %d", &pip);
         if (rc == 1) {
-            ventilation->setPeakEspiratoryPressure(peep);
+            ventilation->setPeakInspiratoryPressure(pip);
         } else {
-            int rc = sscanf(msg, "CONFIG BPM %d", &fr);
+            int rc = sscanf(msg, "CONFIG PEEP %d", &peep);
             if (rc == 1) {
-                ventilation->setRPM(fr);
+                ventilation->setPeakEspiratoryPressure(peep);
+            } else {
+                int rc = sscanf(msg, "CONFIG BPM %d", &fr);
+                if (rc == 1) {
+                    ventilation->setRPM(fr);
+                }
             }
+        }
+    } else if (msg.substring(0, 7) == "RECRUIT") {
+        if (msg == "RECRUIT ON") {
+            ventilation->activateRecruitment();
+        } else if (msg == "RECRUIT OFF") {
+            ventilation->deactivateRecruitment();
         }
     }
     free(msg);
@@ -207,12 +216,14 @@ void loop() {
             if (ventilation->getState() == Init_Exsufflation)
             {
                 Serial2.println("VOL " + String(volume.volume));
+                sensors->resetVolumeIntegrator();
             }
             else if (ventilation->getState() == State_Exsufflation)
             {
                 if (lastState != Init_Exsufflation)
                 {
                     Serial2.println("VOL " + String(volume.volume));
+                    sensors->resetVolumeIntegrator();
                 }
             }
         }

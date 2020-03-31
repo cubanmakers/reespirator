@@ -51,6 +51,14 @@
 // Presión
 #define DEFAULT_PA_TO_CM_H20 0.0102F
 
+// Recruitment
+#define DEFAULT_RECRUITMENT_TIMEOUT 40000 // msec
+#define DEFAULT_RECRUITMENT_PIP 40
+
+// Alarmas
+#define ALARM_MAX_PRESSURE 35 // cm H2O
+#define ALARM_MIN_PRESSURE 1  // cm H2O
+
 // PID constants
 // PID settings and gains
 #define PID_MIN -20000 // TODO: check direction implementation

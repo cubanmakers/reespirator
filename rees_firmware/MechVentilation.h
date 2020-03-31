@@ -31,10 +31,15 @@ enum State
 enum Alarm
 {
     No_Alarm = 0,
-    Pressure_Over_Pip = 1,
-    Pressure_Under_Peep = 2,
-    No_Flux = 3
+    Alarm_Overpressure = 1,
+    Alarm_Underpressure = 2,
+    Alarm_No_Flux = 3
 };
+
+typedef struct {
+    float pip;
+    unsigned short timeoutIns;
+} Configuration_t;
 
 /**
  * This is the mechanical ventilation class.
@@ -73,6 +78,10 @@ public:
      * @note This method must be called on a timer loop.
      */
     void update(void);
+
+    /** Recruitment */
+    void activateRecruitment(void);
+    void deactivateRecruitment(void);
 
     /**
      * getters
@@ -123,15 +132,20 @@ private:
     /** Flow trigger value in litres per minute. */
     float _triggerThreshold;
     /**  Insufflation timeout in seconds. */
-    short _timeoutIns;
+    unsigned short volatile _timeoutIns;
     /** Exsufflation timeout in seconds. */
-    short _timeoutEsp;
+    unsigned short _timeoutEsp;
     /** Breaths per minute */
     uint8_t _rpm;
     /** Peak inspiratory pressure */
-    float _pip;
+    float volatile _pip;
     /** Peak espiratory pressure */
     float _peep;
+    /** Recruitment */
+    bool volatile _recruitmentMode = false;
+
+    /* Configuration */
+    Configuration_t _nominalConfiguration;
 
     /* Internal state */
     /** Current state. */

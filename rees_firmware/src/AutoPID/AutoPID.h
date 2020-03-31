@@ -21,7 +21,7 @@ class AutoPID {
     bool atSetPoint(float threshold);
     // Runs PID calculations when needed. Should be called repeatedly in loop.
     // Automatically reads input and sets output via pointers
-    void run(float *input, float *setpoint, float *output);
+    void run(float input, float setpoint, float *output);
     // Stops PID functionality, output sets to 
     void stop();
     void reset();
@@ -34,7 +34,7 @@ class AutoPID {
     float _Kp, _Ki, _Kd;
     float _integral, _previousError;
     float _bangOn, _bangOff;
-    float *_input, *_setpoint;
+    float _input, _setpoint;
     float _outputMin, _outputMax;
     unsigned long _timeStep, _lastStep;
     bool _stopped;
